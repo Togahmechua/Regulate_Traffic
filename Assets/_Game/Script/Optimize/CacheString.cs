@@ -7,4 +7,9 @@ public class CacheString : MonoBehaviour
     public static string TAG_LVBTN = "IdleLevelBtn";
     public static string TAG_PLAY = "Play_StartCanvas";
     public static string TAG_POP = "Pop";
+    public static string TAG_TURNRIGHT = "TurnRight";
+    public static string TAG_TURNLEFT = "TurnLeft";
+    public static string TAG_HONK = "Honk_Car";
+    public static string TAG_BROKEN = "Broken_Car";
+    public static string TAG_Idle_EnemyCar = "Idle_EnemyCar";
 }

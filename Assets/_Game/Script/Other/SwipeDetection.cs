@@ -55,33 +55,35 @@ public class SwipeDetection : MonoBehaviour
 
     private void DownSwipe()
     {
-        print("down");
+        //print("down");
     }
 
     private void UpSwipe()
     {
-        print("up");
+        //print("up");
     }
 
     private void LeftSwipe()
     {
-        print("left");
+        //print("left");
 
         if (curIndex > 0)
         {
             curIndex--;
             player.transform.position = movePos[curIndex].position;
+            player.TurnLeft();
             curPos = movePos[curIndex];
         }
     }
     private void RightSwipe()
     {
-        print("right");
+        //print("right");
        
         if (curIndex < movePos.Length - 1)
         {
             curIndex++;
             player.transform.position = movePos[curIndex].position;
+            player.TurnRight();
             curPos = movePos[curIndex];
         }
     }
