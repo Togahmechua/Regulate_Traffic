@@ -1,76 +1,58 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class Car : GameUnit
 {
-    private int currentIndex;
-
+    [Header("=== Graphics ===")]
+    [SerializeField] private Transform model;
     [SerializeField] private SpriteRenderer spr;
     [SerializeField] private Sprite[] sprites;
-    [SerializeField] private float speed = 2f;
-    [SerializeField] private float despawnY = -10f;
-
     [SerializeField] private Animator anim;
 
-    private float curPos;
-    private float[] laneX = new float[] { -1.682708f, 0f, 1.682708f };
-    [SerializeField] private int dir;
+    [Header("=== Movement ===")]
+    [SerializeField] private float speed = 2f;
+    [SerializeField] private float despawnY = -15f;
+    [SerializeField] private EPath currentLane;
+
+    public bool isAbleToTurn;
+
+    private int dir;
+    private Coroutine rotateCoroutine;
 
     private void OnEnable()
     {
-        RandSpr();
+        isAbleToTurn = true;
         anim.Play(CacheString.TAG_Idle_EnemyCar);
-       
+        spr.enabled = true;
+        RandSpr();
+        if (model) model.rotation = Quaternion.identity;
     }
 
     private void Update()
     {
-        // Di chuyển xuống trục Y
         transform.Translate(Vector3.down * speed * Time.deltaTime);
 
-        // Nếu vượt quá màn hình thì despawn
         if (transform.position.y < despawnY)
-        {
             SimplePool.Despawn(this);
-        }
     }
 
     public void ChangeLane()
     {
-        IsAbleToChangeLane(dir);
+        if (IsAbleToChangeLane(out int direction))
+        {
+            Turn(direction);
+        }
     }
 
-
-    private bool IsAbleToChangeLane(int direction)
+    private bool IsAbleToChangeLane(out int direction)
     {
-        direction = 0;
+        direction = dir;
 
-        if (Mathf.Approximately(curPos, -1.682708f))
+        switch (currentLane)
         {
-            Debug.Log("Làn trái → chỉ có thể rẽ phải");
-            Turn(dir);
-            return true;
-        }
-        else if (Mathf.Approximately(curPos, 1.682708f))
-        {
-            Debug.Log("Làn phải → chỉ có thể rẽ trái");
-            Turn(dir);
-            return true;
-        }
-        else if (Mathf.Approximately(curPos, 0f))
-        {
-            if (direction < 0)
-            {
-                Debug.Log("Làn giữa → rẽ trái");
-            }
-            else
-            {
-                Debug.Log("Làn giữa → rẽ phải");
-            }
-
-            Turn(dir);
-
-
-            return true;
+            case EPath.Left: direction = 1; return true;
+            case EPath.Right: direction = -1; return true;
+            case EPath.Middle: return true;
         }
 
         return false;
@@ -78,67 +60,97 @@ public class Car : GameUnit
 
     private void Turn(int dir)
     {
-        Debug.Log("+" + dir);
-        // Tính chỉ số mới (trái = -1, phải = +1)
-        int newIndex = Mathf.Clamp(currentIndex + dir, 0, laneX.Length - 1);
+        anim.enabled = false;
 
-        Debug.Log(newIndex);
+        int currentIndex = (int)currentLane;
+        int newIndex = Mathf.Clamp(currentIndex + dir, 0, 2);
+        float newX = LevelManager.Ins.curLevel.GetLaneX(newIndex);
+        currentLane = (EPath)newIndex;
 
-        /*// Lấy giá trị X mới
-        float newX = laneX[newIndex];
-
-        // Cập nhật vị trí và curPos
         transform.position = new Vector2(newX, transform.position.y);
-        curPos = newX;
 
-        Debug.Log($"🚗 Di chuyển từ làn {currentIndex} sang làn {newIndex} (x={newX})");*/
+        Debug.Log($"🚗 Chuyển làn: {(EPath)currentIndex} ➡ {currentLane}");
+
+        if (rotateCoroutine != null) StopCoroutine(rotateCoroutine);
+        rotateCoroutine = StartCoroutine(RotateModel(dir));
     }
 
 
-    private int GetLaneIndex(float x)
+    private IEnumerator RotateModel(int dir)
     {
-        for (int i = 0; i < laneX.Length; i++)
+        float angle = dir < 0 ? 10.23f : -10.23f;
+        float duration = 0.1f;
+        float t = 0f;
+
+        Quaternion startRot = model.rotation;
+        Quaternion endRot = Quaternion.Euler(0, 0, angle);
+
+        // Xoay nghiêng
+        while (t < duration)
         {
-            if (Mathf.Approximately(x, laneX[i]))
-                return i;
+            t += Time.deltaTime;
+            model.rotation = Quaternion.Lerp(startRot, endRot, t / duration);
+            yield return null;
         }
 
-        return 1;
+        // Trở về thẳng
+        yield return new WaitForSeconds(0.1f);
+
+        t = 0f;
+        startRot = model.rotation;
+        endRot = Quaternion.identity;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            model.rotation = Quaternion.Lerp(startRot, endRot, t / duration);
+            yield return null;
+        }
+
+        model.rotation = Quaternion.identity;
+
+        anim.enabled = true;
+    }
+
+    public void TryForceChangeLane()
+    {
+        // 1/3 xác suất
+        if (Random.value <= 1f / 2f)
+        {
+            Debug.Log("📢 Xe bị ép chuyển làn do còi 🚗");
+            ChangeLane();
+        }
+        else
+        {
+            Debug.Log("📢 Xe NGHE còi nhưng KHÔNG chuyển làn ❌");
+        }
+
+        isAbleToTurn = false;
+    }
+
+    public void SetCurPos(Vector3 spawnPos, int randIndex)
+    {
+        transform.position = spawnPos;
+        currentLane = (EPath)randIndex;
+
+        switch (currentLane)
+        {
+            case EPath.Left: dir = 1; break;
+            case EPath.Right: dir = -1; break;
+            case EPath.Middle: dir = Random.value > 0.5f ? 1 : -1; break;
+        }
     }
 
     private void RandSpr()
     {
         if (sprites.Length > 0)
-        {
             spr.sprite = sprites[Random.Range(0, sprites.Length)];
-        }
     }
 
     public void Die()
     {
-        anim.Play(CacheString.TAG_BROKEN);
-    }
-
-    public void SetCurPos(Vector3 spawnPos, int randIndex)
-    {
-        curPos = spawnPos.x;
-        // Tìm chỉ số hiện tại
-        currentIndex = GetLaneIndex(curPos);
-
-        if (randIndex == 0)
-        {
-            // Đang ở làn trái → chỉ có thể rẽ phải
-            dir = 1;
-        }
-        else if (randIndex == 2)
-        {
-            // Đang ở làn phải → chỉ có thể rẽ trái
-            dir = -1;
-        }
-        else if (randIndex == 1)
-        {
-            // Đang ở giữa → có thể rẽ trái hoặc phải → random
-            dir = Random.value > 0.5f ? 1 : -1;
-        }
+        anim.Play(CacheString.TAG_BROKEN); // Vẫn dùng Animator
     }
 }
+
+public enum EPath { Left, Middle, Right }

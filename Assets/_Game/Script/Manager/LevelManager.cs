@@ -20,6 +20,7 @@ public class LevelManager : Singleton<LevelManager>
     {
         if (curLevel != null)
         {
+            curLevel.DespawnAll();
             Destroy(curLevel.gameObject);
         }
     }

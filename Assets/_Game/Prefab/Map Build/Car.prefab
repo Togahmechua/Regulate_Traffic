@@ -133,6 +133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poolType: 1
+  model: {fileID: 4731951032839641279}
   spr: {fileID: 3601891918079965342}
   sprites:
   - {fileID: 21300000, guid: fc6c224c7cd72cf42b685803aa437f61, type: 3}
@@ -140,9 +141,11 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5715e259c1aa0aa47b2d89e275efa047, type: 3}
   - {fileID: 21300000, guid: 8407506960fb23246835dbaf75a0311f, type: 3}
   - {fileID: 21300000, guid: 08e662837979de94dbdbfde9bbfc27a3, type: 3}
+  anim: {fileID: 5731798570989024746}
   speed: 2
   despawnY: -10
-  anim: {fileID: 5731798570989024746}
+  currentLane: 0
+  isAbleToTurn: 0
 --- !u!61 &7546648905254088313
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -234,5 +237,5 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0

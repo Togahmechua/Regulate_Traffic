@@ -20,8 +20,18 @@ public class LooseCanvas : UICanvas
 
     private void OnEnable()
     {
-        //AudioManager.Ins.PlaySFX(AudioManager.Ins.win);
+        AudioManager.Ins.PlaySFX(AudioManager.Ins.loose);
         Display();
+        Time.timeScale = 0f;
+    }
+    private void OnDisable()
+    {
+        if (transitionCoroutine != null)
+        {
+            StopCoroutine(transitionCoroutine);
+            transitionCoroutine = null;
+        }
+        Time.timeScale = 1f;
     }
 
     private void Start()
@@ -71,7 +81,7 @@ public class LooseCanvas : UICanvas
         if (!flag)
             return;
         flag = false;
-        //AudioManager.Ins.PlaySFX(AudioManager.Ins.coin);
+        AudioManager.Ins.PlaySFX(AudioManager.Ins.coin);
     }
 
     public void Home()
@@ -92,19 +102,10 @@ public class LooseCanvas : UICanvas
             () =>
             {
                 Debug.Log("Loose");
-                //LevelManager.Ins.DespawnMap();
+                LevelManager.Ins.DespawmLevel();
                 UIManager.Ins.OpenUI<StartCanvas>();
             }
         );
-    }
-
-    private void OnDisable()
-    {
-        if (transitionCoroutine != null)
-        {
-            StopCoroutine(transitionCoroutine);
-            transitionCoroutine = null;
-        }
     }
 
 

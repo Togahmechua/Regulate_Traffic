@@ -32,39 +32,42 @@ public class PauseCanvas : UICanvas
     {
         continueBtn.onClick.AddListener(() =>
         {
-            //AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
+            AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
             UIManager.Ins.CloseUI<PauseCanvas>();
             UIManager.Ins.OpenUI<MainCanvas>();
         });
 
         menuBtn.onClick.AddListener(() =>
         {
-            //AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
+            AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
 
             UIManager.Ins.TransitionUI<ChangeUICanvas, PauseCanvas>(0.6f,
                 () =>
                 {
-                    //LevelManager.Ins.DespawnMap();
+                    UIManager.Ins.mainCanvas.RefreshTimer();
+                    LevelManager.Ins.DespawmLevel();
                     UIManager.Ins.OpenUI<StartCanvas>();
                 });
         });
 
         retryBtn.onClick.AddListener(() =>
         {
-            //AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
+            AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
            
             UIManager.Ins.TransitionUI<ChangeUICanvas, PauseCanvas>(0.6f,
                 () =>
                 {
+                    UIManager.Ins.mainCanvas.RefreshTimer();
                     UIManager.Ins.CloseUI<PauseCanvas>();
+                    LevelManager.Ins.DespawmLevel();
                     UIManager.Ins.OpenUI<MainCanvas>();
-                    //LevelManager.Ins.LoadMapByID(LevelManager.Ins.curMapID);
+                    LevelManager.Ins.SpawnLevel();
                 });
         });
 
         soundBtn.onClick.AddListener(() =>
         {
-           // AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
+            AudioManager.Ins.PlaySFX(AudioManager.Ins.click);
 
             if (AudioManager.Ins.IsMuted)
                 AudioManager.Ins.TurnOn();

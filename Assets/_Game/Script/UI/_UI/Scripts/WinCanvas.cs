@@ -24,7 +24,7 @@ public class WinCanvas : UICanvas
 
     private void OnEnable()
     {
-        AudioManager.Ins.PlaySFX(AudioManager.Ins.win);
+        //AudioManager.Ins.PlaySFX(AudioManager.Ins.win);
         Display();
     }
 
